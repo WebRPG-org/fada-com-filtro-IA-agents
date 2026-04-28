@@ -2,16 +2,37 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Pokédex IA</title>
+  <title>Pokédex IA - Pallet Town</title>
   <link rel="stylesheet" href="pokedex.css" />
 </head>
 <body>
 
 <div class="pokedex">
-  <div class="screen" id="screen">🔎 Aguardando comando...</div>
+  <div class="screen" id="screen">🔎 Bem-vindo a Pallet Town. Clique nos locais para explorar o Centro, o Laboratório e a cidade.</div>
+
+  <div class="map-card">
+    <div class="map-viewport" id="mapViewport"></div>
+    <div class="location-panel hidden" id="locationPanel">
+      <div class="location-header" id="locationTitle"></div>
+      <div class="location-inside" id="locationInside"></div>
+      <button class="back-button" onclick="showMap()">⬅️ Voltar à cidade</button>
+    </div>
+  </div>
+
+  <div class="map-buttons">
+    <button onclick="showMap()">🏘️ Cidade</button>
+    <button onclick="enterLocation('center')">🏥 Centro Pokémon</button>
+    <button onclick="enterLocation('lab')">🧪 Laboratório</button>
+  </div>
 
   <input id="input" placeholder="Fale com o Pokémon..." />
   <button onclick="send()">Enviar</button>
+
+  <div class="bot-controls">
+    <button onclick="botControl('play')">▶️ Play Bot</button>
+    <button onclick="botControl('pause')">⏸️ Pause Bot</button>
+    <button onclick="botControl('stop')">⏹️ Stop Bot</button>
+  </div>
 </div>
 
 <script src="pokedex.js"></script>
