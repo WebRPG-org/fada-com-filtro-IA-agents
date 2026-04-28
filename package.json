@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "scraper": "ts-node scraper.ts",
+    "build": "tsc",
+    "test": "playwright test"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fada-com-filtro/IA-agents.git"
@@ -18,6 +22,8 @@
   "homepage": "https://github.com/fada-com-filtro/IA-agents#readme",
   "devDependencies": {
     "@playwright/test": "^1.59.1",
-    "@types/node": "^25.6.0"
+    "@types/node": "^25.6.0",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
   }
 }
