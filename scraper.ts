@@ -7,26 +7,54 @@ interface Escola {
 (async () => {
   const browser = await chromium.launch({ headless: false });
   const page = await browser.newPage();
+  page.setDefaultTimeout(45000);
 
-  // abre Google Maps direto (melhor que Google normal)
-  await page.goto('https://www.google.com/maps');
+  try {
+    // abre Google Maps direto
+    console.log('Abrindo Google Maps...');
+    await page.goto('https://www.google.com/maps', { waitUntil: 'domcontentloaded' });
 
-  // busca
-  await page.fill('input#searchboxinput', 'escola infantil Cabo Frio');
-  await page.keyboard.press('Enter');
+    // esperar a página carregar completamente
+    await page.waitForTimeout(5000);
 
-  await page.waitForTimeout(5000);
+    // tentar preencher o campo de busca
+    console.log('Buscando campo de busca...');
+    try {
+      const searchInput = page.locator('input[aria-label*="Search"]').first();
+      await searchInput.fill('escola infantil Cabo Frio', { timeout: 5000 });
+      await page.keyboard.press('Enter');
+    } catch (e) {
+      console.log('Tentando seletor alternativo...');
+      await page.fill('input[type="text"]', 'escola infantil Cabo Frio');
+      await page.keyboard.press('Enter');
+    }
 
-  // pega resultados
-  const escolas = await page.$$eval(
-    '.Nv2PK',
-    (items): Escola[] =>
-      items.map((item) => ({
-        nome: (item as HTMLElement).textContent || ''
-      }))
-  );
+    // aguardar resultados
+    console.log('Aguardando resultados...');
+    await page.waitForTimeout(8000);
 
-  console.log(escolas);
+    // pega resultados
+    console.log('Coletando resultados...');
+    const escolas = await page.$$eval(
+      'div[data-index]',
+      (items): Escola[] =>
+        items
+          .map((item) => ({
+            nome: (item as HTMLElement).textContent || ''
+          }))
+          .filter((e) => e.nome.length > 5)
+          .slice(0, 10)
+    ).catch(() => []);
 
-  await browser.close();
+    console.log('\n✅ Escolas encontradas:');
+    console.log(escolas);
+
+    if (escolas.length === 0) {
+      console.log('Nenhuma escola encontrada com este seletor.');
+    }
+  } catch (error) {
+    console.error('❌ Erro:', error);
+  } finally {
+    await browser.close();
+  }
 })();
