@@ -31,6 +31,7 @@
     "test": "tests"
   },
   "dependencies": {
+    "@openrouter/sdk": "^0.12.22",
     "acorn": "^8.16.0",
     "acorn-walk": "^8.3.5",
     "arg": "^4.1.3",

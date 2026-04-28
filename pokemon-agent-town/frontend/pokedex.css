@@ -1,0 +1,23 @@
+body {
+  background: #d32f2f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: monospace;
+}
+
+.pokedex {
+  background: #ff3b3b;
+  border: 5px solid black;
+  padding: 20px;
+  width: 300px;
+}
+
+.screen {
+  background: #9bdc28;
+  height: 150px;
+  padding: 10px;
+  margin-bottom: 10px;
+  overflow-y: auto;
+}
