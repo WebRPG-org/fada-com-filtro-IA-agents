@@ -1,6 +1,7 @@
 import { chromium, Browser, Page } from 'playwright';
 import axios from 'axios';
-import dotenv from 'dotenv';
+import { google, sheets_v4 } from 'googleapis';
+import * as dotenv from 'dotenv';
 
 // Carregar variáveis de ambiente
 dotenv.config();
@@ -19,23 +20,108 @@ interface EscolaDetalhes {
 }
 
 const WEBHOOK_URL = process.env.WEBHOOK_URL || '';
+const SEARCH_QUERY = process.env.SEARCH_QUERY || 'escola infantil Cabo Frio';
+const CITY_FILTER = process.env.CITY_FILTER || 'Cabo Frio';
+const GOOGLE_SHEET_ID = process.env.GOOGLE_SHEET_ID || '';
+const GOOGLE_SHEET_NAME = process.env.GOOGLE_SHEET_NAME || 'Sheet1';
+const GOOGLE_SERVICE_ACCOUNT_KEY_FILE = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE || '';
+const TEST_MODE = process.env.TEST_MODE === 'true' || !WEBHOOK_URL || WEBHOOK_URL.includes('seuwebhook');
+const MAX_RESULTS = Number(process.env.MAX_RESULTS) || 500;
 
 // Validação do webhook
-if (!WEBHOOK_URL) {
-  console.error('❌ WEBHOOK_URL não configurada. Configure a variável de ambiente ou arquivo .env');
-  process.exit(1);
-}
-
 console.log('🤖 Bot de Escolas Iniciado');
-console.log(`📤 Webhook: ${WEBHOOK_URL}\n`);
+if (TEST_MODE) {
+  console.log('⚠️ MODO TESTE: Executando sem enviar dados para webhook');
+  console.log('   Configure WEBHOOK_URL no .env para modo produção\n');
+} else {
+  console.log(`📤 Webhook: ${WEBHOOK_URL}\n`);
+}
 
 (async () => {
   let browser: Browser | null = null;
+  let page: Page | null = null;
+
+  const getPage = (): Page => {
+    if (!page) {
+      throw new Error('Página não inicializada');
+    }
+    if (page.isClosed()) {
+      const pages = browser?.contexts()[0].pages() || [];
+      page = pages[0] || page;
+    }
+    return page;
+  };
+
+  const initSheetsClient = async (): Promise<sheets_v4.Sheets | null> => {
+    if (!GOOGLE_SHEET_ID || !GOOGLE_SERVICE_ACCOUNT_KEY_FILE) {
+      console.log('⚠️ Google Sheets não configurado. Pulando salvamento em planilha.');
+      return null;
+    }
+
+    const auth = new google.auth.GoogleAuth({
+      keyFile: GOOGLE_SERVICE_ACCOUNT_KEY_FILE,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets']
+    });
+
+    const authClient = await auth.getClient();
+    const sheetsClient = google.sheets({ version: 'v4', auth });
+    return sheetsClient;
+  };
+
+  const appendSheetRow = async (sheetsClient: sheets_v4.Sheets | null, row: Array<string>) => {
+    if (!sheetsClient) {
+      return;
+    }
+
+    try {
+      await sheetsClient.spreadsheets.values.append({
+        spreadsheetId: GOOGLE_SHEET_ID,
+        range: `${GOOGLE_SHEET_NAME}!A:E`,
+        valueInputOption: 'RAW',
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: {
+          values: [row]
+        }
+      });
+    } catch (err) {
+      console.error('⚠️ Erro ao salvar no Google Sheets:', (err as Error).message);
+    }
+  };
+
+  const loadAllResults = async (page: Page) => {
+    let previousCount = 0;
+    let stableCountTimes = 0;
+
+    while (stableCountTimes < 3) {
+      const items = page.locator('.Nv2PK');
+      const count = await items.count();
+      if (count === previousCount) {
+        stableCountTimes += 1;
+      } else {
+        stableCountTimes = 0;
+      }
+      previousCount = count;
+
+      if (count === 0) {
+        await page.waitForTimeout(1500);
+        continue;
+      }
+
+      if (count >= MAX_RESULTS) {
+        break;
+      }
+
+      await items.nth(count - 1).scrollIntoViewIfNeeded();
+      await page.waitForTimeout(2500);
+    }
+
+    return Math.min(await page.locator('.Nv2PK').count(), MAX_RESULTS);
+  };
 
   try {
     // 1️⃣ Abrir navegador
     browser = await chromium.launch({ headless: false });
-    const page = await browser.newPage();
+    page = await browser.newPage();
     page.setDefaultTimeout(45000);
 
     console.log('🔎 Abrindo Google Maps...');
@@ -43,130 +129,147 @@ console.log(`📤 Webhook: ${WEBHOOK_URL}\n`);
 
     // Esperar o campo de busca aparecer
     try {
-      await page.waitForSelector('#searchboxinput', { timeout: 10000 });
+      await page.waitForSelector('#ucc-1, input[name="q"]', { timeout: 15000 });
     } catch {
       console.log('⚠️ Campo de busca não encontrado com seletor padrão');
     }
 
     // 2️⃣ BUSCA
-    console.log('🔍 Buscando por "escola infantil Cabo Frio"...');
+    console.log(`🔍 Buscando por "${SEARCH_QUERY}"...`);
     try {
-      await page.fill('#searchboxinput', 'escola infantil Cabo Frio');
+      await page.fill('#ucc-1, input[name="q"]', SEARCH_QUERY);
       await page.keyboard.press('Enter');
     } catch (e) {
-      console.log('⚠️ Tentando seletor alternativo para busca');
-      const searchBox = page.locator('input[aria-label*="Search"]').first();
-      await searchBox.fill('escola infantil Cabo Frio');
-      await page.keyboard.press('Enter');
+      console.log('⚠️ Seletor de busca falhou, tentando alternativas...');
+      try {
+        const searchBox = page.locator('input[name="q"]').first();
+        await searchBox.fill(SEARCH_QUERY, { timeout: 5000 });
+        await page.keyboard.press('Enter');
+      } catch (e2) {
+        console.log('⚠️ Tentando com qualquer campo de texto...');
+        const searchInputs = await page.$$('input[type="text"]');
+        if (searchInputs.length > 0) {
+          await searchInputs[0].fill(SEARCH_QUERY);
+          await page.keyboard.press('Enter');
+        } else {
+          throw new Error('Nenhum input de texto encontrado');
+        }
+      }
     }
 
     await page.waitForTimeout(5000);
 
+    console.log(`📍 Filtrando apenas resultados de: ${CITY_FILTER}`);
     console.log('📍 Coletando resultados...');
 
-    // 3️⃣ Scroll para carregar mais resultados
-    for (let i = 0; i < 5; i++) {
-      await page.mouse.wheel(0, 3000);
-      await page.waitForTimeout(2000);
-    }
+    // 3️⃣ Scroll para carregar todos os resultados
+    const totalItems = await loadAllResults(page);
+    console.log(`✅ Total carregado: ${totalItems} resultados\n`);
 
-    // 4️⃣ Extrair lista de escolas
-    let escolas: Escola[] = [];
-    try {
-      escolas = await page.$$eval('.Nv2PK', (items) => {
-        return items.map((item) => {
-          const nomeEl = (item as HTMLElement).querySelector('.qBF1Pd');
-          const nome = nomeEl?.textContent || '';
-          const info = (item as HTMLElement).innerText;
+    const sheetsClient = await initSheetsClient();
 
-          return { nome, info };
-        });
-      });
-    } catch (e) {
-      console.log('⚠️ Seletor .Nv2PK não funcionou, tentando alternativa');
-      escolas = [];
-    }
-
-    console.log(`✅ Encontradas: ${escolas.length} escolas\n`);
-
-    // 5️⃣ Processar cada escola
+    // 4️⃣ Processar cada escola
     const resultados: EscolaDetalhes[] = [];
-
-    for (let i = 0; i < Math.min(escolas.length, 10); i++) {
-      const escola = escolas[i];
+    const totalToProcess = totalItems;
+    for (let i = 0; i < totalToProcess; i++) {
+      const activePage = getPage();
+      const item = activePage.locator('.Nv2PK').nth(i);
+      const nome = (await item.locator('.qBF1Pd').first().textContent())?.trim() || `item ${i + 1}`;
 
       try {
-        console.log(`[${i + 1}/10] ➡️ Processando: ${escola.nome}...`);
+        console.log(`[${i + 1}/${totalToProcess}] ➡️ Processando: ${nome}...`);
 
-        // Clicar na escola
+        await item.scrollIntoViewIfNeeded();
+        await item.click();
+        await activePage.waitForTimeout(3000);
+
         try {
-          await page.click(`text=${escola.nome}`);
+          await activePage.waitForSelector('button[data-item-id^="phone"], button[data-item-id="address"], div[data-attrid]', { timeout: 10000 });
         } catch {
-          // Tentar com seletor alternativo
-          const items = await page.$$('.Nv2PK');
-          if (i < items.length) {
-            await items[i].click();
-          }
+          console.log('⚠️ Detalhes da escola não carregaram rapidamente, continuando...');
         }
-
-        await page.waitForTimeout(3000);
 
         // Extrair telefone
         let telefone = '';
         try {
-          const phoneBtn = await page.$('button[data-item-id^="phone"]');
-          if (phoneBtn) {
-            telefone = await phoneBtn.innerText();
-          }
-        } catch (e) {
+          const phoneBtn = await activePage.locator('button[data-item-id^="phone"]').first();
+          telefone = (await phoneBtn.innerText())?.trim() || '';
+        } catch {
           // Telefone pode não existir
         }
 
         // Extrair endereço
         let endereco = '';
         try {
-          const addressBtn = await page.$('button[data-item-id="address"]');
-          if (addressBtn) {
-            endereco = await addressBtn.innerText();
-          }
-        } catch (e) {
+          const addressBtn = await activePage.locator('button[data-item-id="address"]').first();
+          endereco = (await addressBtn.innerText())?.trim() || '';
+        } catch {
           // Endereço pode não existir
         }
 
         // Extrair Instagram
         let instagram = '';
         try {
-          const links = await page.$$('a');
-          for (const link of links) {
+          const linkHandles = await activePage.locator('a').elementHandles();
+          for (const link of linkHandles) {
             const href = await link.getAttribute('href');
             if (href && href.includes('instagram')) {
               instagram = href;
               break;
             }
           }
-        } catch (e) {
+        } catch {
           // Instagram pode não existir
         }
 
         const escolaDetail: EscolaDetalhes = {
-          nome: escola.nome,
+          nome,
           endereco,
           telefone,
           instagram
         };
 
+        const cityMatch = CITY_FILTER
+          ? endereco.toLowerCase().includes(CITY_FILTER.toLowerCase())
+          : true;
+
+        if (!cityMatch) {
+          console.log(`   ⚠️ Pulando pois não pertence a ${CITY_FILTER}: ${endereco}`);
+          continue;
+        }
+
         resultados.push(escolaDetail);
 
-        // 6️⃣ Enviar para webhook do Make
+        // 6️⃣ Salvar no Google Sheets
+        try {
+          if (sheetsClient) {
+            await appendSheetRow(sheetsClient, [
+              escolaDetail.nome,
+              escolaDetail.endereco,
+              escolaDetail.telefone,
+              escolaDetail.instagram,
+              new Date().toISOString()
+            ]);
+            console.log('   ✅ Salvo no Google Sheets');
+          }
+        } catch (sheetError) {
+          console.error('   ⚠️ Erro ao salvar no Google Sheets:', (sheetError as Error).message);
+        }
+
+        // 7️⃣ Enviar para webhook do Make
         try {
           console.log(`   📤 Enviando para webhook...`);
-          await axios.post(WEBHOOK_URL, escolaDetail, {
-            timeout: 10000,
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-          console.log(`   ✅ Enviado com sucesso!\n`);
+          if (!TEST_MODE) {
+            await axios.post(WEBHOOK_URL, escolaDetail, {
+              timeout: 10000,
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            console.log(`   ✅ Enviado com sucesso!\n`);
+          } else {
+            console.log(`   ✅ [TESTE] Dados seriam enviados:\n   ${JSON.stringify(escolaDetail)}\n`);
+          }
         } catch (webhookError) {
           console.error(`   ⚠️ Erro ao enviar webhook:`, (webhookError as Error).message);
           console.log(`   Dados: ${JSON.stringify(escolaDetail)}\n`);
@@ -174,7 +277,7 @@ console.log(`📤 Webhook: ${WEBHOOK_URL}\n`);
 
         await page.waitForTimeout(2000);
       } catch (err) {
-        console.error(`⚠️ Erro ao processar: ${escola.nome}`);
+        console.error(`⚠️ Erro ao processar: ${nome}`);
         console.error((err as Error).message);
         console.log();
       }
