@@ -22,7 +22,7 @@ interface Escola {
     '.Nv2PK',
     (items): Escola[] =>
       items.map((item) => ({
-        nome: item.innerText
+        nome: (item as HTMLElement).textContent || ''
       }))
   );
 
