@@ -1,0 +1,105 @@
+div {
+	position: relative;
+	font-family: Arial, sans-serif;
+	font-size: 20px;
+	letter-spacing: 3px;
+	line-height: 0px;
+	text-indent: 0px;
+	top: 2px;
+	padding: 4px;
+	text-align: center;
+}
+
+.stats {
+	position: relative;
+	top: 10px;
+	width: 100%;
+}
+
+.stats td {
+	width: 9%;
+}
+
+.head td:not(:nth-child(1)) {
+	background-color: #CCFF99;
+	text-align: center;
+	color: #009900;
+	font-weight: bold;
+}
+
+.stats tr:nth-child(2) td:first-child,
+.stats tr:nth-child(3) td:first-child,
+.stats tr:nth-child(4) td:first-child,
+.stats tr:nth-child(5) td:first-child {
+	text-align: right;
+	font-family: Arial, sans-serif;
+}
+
+.box,
+.formulaBox {
+    width: 102px;
+    background-color: #efefef;
+}
+
+.formulaBox:focus {
+    width: 240px;
+}
+
+.main {
+	position: relative;
+	top: 10px;
+	border-collapse: collapse;
+	border-width: 1px;
+	border-color: #336600;
+	color: #009900;
+	text-align: center;
+	width: 100%;
+	overflow: hidden;
+}
+
+.main td, .main th {
+	border-width: 1px;
+	border-color: #336600;
+	border-style: solid;
+	padding: 1px;
+	width: 9%;
+	position: relative;
+	
+}
+
+.main thead {
+	background-color: #CCFF99;
+}
+
+.main th:first-child, .main td:first-child {
+	width: 8%;
+}
+
+body:not(.nohover) .main tbody tr:hover {
+	background: #d1fad8;
+}
+
+.main td:hover::after,
+.main thead th:not(:empty):hover::after,
+.main td:focus::after,
+.main thead th:not(:empty):focus::after { 
+	content: '';  
+	height: 10000px;
+	left: 0;
+	position: absolute;  
+	top: -5000px;
+	width: 100%;
+	z-index: -1;
+}
+
+.main td:hover::after,
+.main th:hover::after {
+ 	background-color: #d1fad8;
+}
+
+body {
+	background: #e2e2e2;
+	background: -moz-linear-gradient(-45deg, #e2e2e2 0%, #fefefe 46%);
+	background: -webkit-linear-gradient(-45deg, #e2e2e2 0%,#fefefe 46%);
+	background: linear-gradient(135deg, #e2e2e2 0%,#fefefe 46%);
+}

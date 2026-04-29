@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+  <title>FlyingDream's Enemy Level Calculator</title>
+  <link rel="stylesheet" href="FlyingDream%27s%20Enemy%20Level%20Calculator_files/enemylevelcalculator.css" type="text/css">
+  <!--Thank you for using my calculator for RPG Maker MV! You can contact me through Yanfly's video https://www.youtube.com/watch?v=dr2ghn56oA4-->
+</head>
+<body>
+  <div>FlyingDream's Enemy Level Calculator</div>
+  <table class="stats" cellspacing="0">
+    <tbody><tr class="head">
+      <td></td>
+      <td>MaxHP</td>
+      <td>MaxMP</td>
+      <td>ATK</td>
+      <td>DEF</td>
+      <td>MAT</td>
+      <td>MDF</td>
+      <td>AGI</td>
+      <td>LUK</td>
+      <td>EXP</td>
+      <td>GOLD</td>
+    </tr>
+    <tr>
+      <td>Base:</td>
+      <td><input id="base0" class="box" value="100" min="1" onclick="update()" type="number"></td>
+      <td><input id="base1" class="box" value="30" min="1" onclick="update()" type="number"></td>
+      <td><input id="base2" class="box" value="10" min="1" onclick="update()" type="number"></td>
+      <td><input id="base3" class="box" value="10" min="1" onclick="update()" type="number"></td>
+      <td><input id="base4" class="box" value="10" min="1" onclick="update()" type="number"></td>
+      <td><input id="base5" class="box" value="10" min="1" onclick="update()" type="number"></td>
+      <td><input id="base6" class="box" value="10" min="1" onclick="update()" type="number"></td>
+      <td><input id="base7" class="box" value="10" min="1" onclick="update()" type="number"></td>
+      <td><input id="base8" class="box" value="20" min="1" onclick="update()" type="number"></td>
+      <td><input id="base9" class="box" value="50" min="1" onclick="update()" type="number"></td>
+    </tr>
+    <tr>
+      <td>Rate:</td>
+      <td><input id="rate0" class="box" value="0.15" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate1" class="box" value="0.10" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate2" class="box" value="0.05" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate3" class="box" value="0.05" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate4" class="box" value="0.05" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate5" class="box" value="0.05" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate6" class="box" value="0.05" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate7" class="box" value="0.05" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate8" class="box" value="0.15" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="rate9" class="box" value="0.15" min="0.01" step="0.01" onclick="update()" type="number"></td>
+    </tr>
+    <tr>
+      <td>Flat:</td>
+      <td><input id="flat0" class="box" value="50.0" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat1" class="box" value="10.0" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat2" class="box" value="2.5" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat3" class="box" value="2.5" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat4" class="box" value="2.5" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat5" class="box" value="2.5" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat6" class="box" value="2.5" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat7" class="box" value="2.5" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat8" class="box" value="10.0" min="0.01" step="0.01" onclick="update()" type="number"></td>
+      <td><input id="flat9" class="box" value="10.0" min="0.01" step="0.01" onclick="update()" type="number"></td>
+    </tr>
+    <tr>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Formula:</td>
+      <td><input id="formula0" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula1" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula2" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula3" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula4" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula5" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula6" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula7" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula8" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+      <td><input id="formula9" class="formulaBox" value="b * (1 + (level - 1) * r) + (f * (level - 1))" onclick="update()" type="text"></td>
+    </tr>
+    <tr>
+      <td colspan="11">
+        <table class="main">
+          <thead>
+            <tr>
+              <th>Levels</th>
+              <th>MaxHP</th>
+              <th>MaxMP</th>
+              <th>ATK</th>
+              <th>DEF</th>
+              <th>MAT</th>
+              <th>MDF</th>
+              <th>AGI</th>
+              <th>LUK</th>
+              <th>EXP</th>
+              <th>GOLD</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input id="level0" class="box" value="1" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp0">100</span></td>
+              <td><span id="maxmp0">30</span></td>
+              <td><span id="atk0">10</span></td>
+              <td><span id="def0">10</span></td>
+              <td><span id="mat0">10</span></td>
+              <td><span id="mdf0">10</span></td>
+              <td><span id="agi0">10</span></td>
+              <td><span id="luk0">10</span></td>
+              <td><span id="exp0">20</span></td>
+              <td><span id="gold0">50</span></td>
+            </tr>
+            <tr>
+              <td><input id="level1" class="box" value="2" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp1">165</span></td>
+              <td><span id="maxmp1">43</span></td>
+              <td><span id="atk1">13</span></td>
+              <td><span id="def1">13</span></td>
+              <td><span id="mat1">13</span></td>
+              <td><span id="mdf1">13</span></td>
+              <td><span id="agi1">13</span></td>
+              <td><span id="luk1">13</span></td>
+              <td><span id="exp1">33</span></td>
+              <td><span id="gold1">67</span></td>
+            </tr>
+            <tr>
+              <td><input id="level2" class="box" value="3" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp2">230</span></td>
+              <td><span id="maxmp2">56</span></td>
+              <td><span id="atk2">16</span></td>
+              <td><span id="def2">16</span></td>
+              <td><span id="mat2">16</span></td>
+              <td><span id="mdf2">16</span></td>
+              <td><span id="agi2">16</span></td>
+              <td><span id="luk2">16</span></td>
+              <td><span id="exp2">46</span></td>
+              <td><span id="gold2">85</span></td>
+            </tr>
+            <tr>
+              <td><input id="level3" class="box" value="4" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp3">295</span></td>
+              <td><span id="maxmp3">69</span></td>
+              <td><span id="atk3">19</span></td>
+              <td><span id="def3">19</span></td>
+              <td><span id="mat3">19</span></td>
+              <td><span id="mdf3">19</span></td>
+              <td><span id="agi3">19</span></td>
+              <td><span id="luk3">19</span></td>
+              <td><span id="exp3">59</span></td>
+              <td><span id="gold3">102</span></td>
+            </tr>
+            <tr>
+              <td><input id="level4" class="box" value="5" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp4">360</span></td>
+              <td><span id="maxmp4">82</span></td>
+              <td><span id="atk4">22</span></td>
+              <td><span id="def4">22</span></td>
+              <td><span id="mat4">22</span></td>
+              <td><span id="mdf4">22</span></td>
+              <td><span id="agi4">22</span></td>
+              <td><span id="luk4">22</span></td>
+              <td><span id="exp4">72</span></td>
+              <td><span id="gold4">120</span></td>
+            </tr>
+            <tr>
+              <td><input id="level5" class="box" value="10" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp5">685</span></td>
+              <td><span id="maxmp5">147</span></td>
+              <td><span id="atk5">37</span></td>
+              <td><span id="def5">37</span></td>
+              <td><span id="mat5">37</span></td>
+              <td><span id="mdf5">37</span></td>
+              <td><span id="agi5">37</span></td>
+              <td><span id="luk5">37</span></td>
+              <td><span id="exp5">137</span></td>
+              <td><span id="gold5">207</span></td>
+            </tr>
+            <tr>
+              <td><input id="level6" class="box" value="20" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp6">1,335</span></td>
+              <td><span id="maxmp6">277</span></td>
+              <td><span id="atk6">67</span></td>
+              <td><span id="def6">67</span></td>
+              <td><span id="mat6">67</span></td>
+              <td><span id="mdf6">67</span></td>
+              <td><span id="agi6">67</span></td>
+              <td><span id="luk6">67</span></td>
+              <td><span id="exp6">267</span></td>
+              <td><span id="gold6">382</span></td>
+            </tr>
+            <tr>
+              <td><input id="level7" class="box" value="30" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp7">1,985</span></td>
+              <td><span id="maxmp7">407</span></td>
+              <td><span id="atk7">97</span></td>
+              <td><span id="def7">97</span></td>
+              <td><span id="mat7">97</span></td>
+              <td><span id="mdf7">97</span></td>
+              <td><span id="agi7">97</span></td>
+              <td><span id="luk7">97</span></td>
+              <td><span id="exp7">397</span></td>
+              <td><span id="gold7">557</span></td>
+            </tr>
+            <tr>
+              <td><input id="level8" class="box" value="40" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp8">2,635</span></td>
+              <td><span id="maxmp8">537</span></td>
+              <td><span id="atk8">127</span></td>
+              <td><span id="def8">127</span></td>
+              <td><span id="mat8">127</span></td>
+              <td><span id="mdf8">127</span></td>
+              <td><span id="agi8">127</span></td>
+              <td><span id="luk8">127</span></td>
+              <td><span id="exp8">527</span></td>
+              <td><span id="gold8">732</span></td>
+            </tr>
+            <tr>
+              <td><input id="level9" class="box" value="50" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp9">3,285</span></td>
+              <td><span id="maxmp9">667</span></td>
+              <td><span id="atk9">157</span></td>
+              <td><span id="def9">157</span></td>
+              <td><span id="mat9">157</span></td>
+              <td><span id="mdf9">157</span></td>
+              <td><span id="agi9">157</span></td>
+              <td><span id="luk9">157</span></td>
+              <td><span id="exp9">657</span></td>
+              <td><span id="gold9">907</span></td>
+            </tr>
+            <tr>
+              <td><input id="level10" class="box" value="60" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp10">3,935</span></td>
+              <td><span id="maxmp10">797</span></td>
+              <td><span id="atk10">187</span></td>
+              <td><span id="def10">187</span></td>
+              <td><span id="mat10">187</span></td>
+              <td><span id="mdf10">187</span></td>
+              <td><span id="agi10">187</span></td>
+              <td><span id="luk10">187</span></td>
+              <td><span id="exp10">787</span></td>
+              <td><span id="gold10">1,082</span></td>
+            </tr>
+            <tr>
+              <td><input id="level11" class="box" value="70" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp11">4,585</span></td>
+              <td><span id="maxmp11">927</span></td>
+              <td><span id="atk11">217</span></td>
+              <td><span id="def11">217</span></td>
+              <td><span id="mat11">217</span></td>
+              <td><span id="mdf11">217</span></td>
+              <td><span id="agi11">217</span></td>
+              <td><span id="luk11">217</span></td>
+              <td><span id="exp11">917</span></td>
+              <td><span id="gold11">1,257</span></td>
+            </tr>
+            <tr>
+              <td><input id="level12" class="box" value="80" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp12">5,235</span></td>
+              <td><span id="maxmp12">1,057</span></td>
+              <td><span id="atk12">247</span></td>
+              <td><span id="def12">247</span></td>
+              <td><span id="mat12">247</span></td>
+              <td><span id="mdf12">247</span></td>
+              <td><span id="agi12">247</span></td>
+              <td><span id="luk12">247</span></td>
+              <td><span id="exp12">1,047</span></td>
+              <td><span id="gold12">1,432</span></td>
+            </tr>
+            <tr>
+              <td><input id="level13" class="box" value="90" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp13">5,885</span></td>
+              <td><span id="maxmp13">1,187</span></td>
+              <td><span id="atk13">277</span></td>
+              <td><span id="def13">277</span></td>
+              <td><span id="mat13">277</span></td>
+              <td><span id="mdf13">277</span></td>
+              <td><span id="agi13">277</span></td>
+              <td><span id="luk13">277</span></td>
+              <td><span id="exp13">1,177</span></td>
+              <td><span id="gold13">1,607</span></td>
+            </tr>
+            <tr>
+              <td><input id="level14" class="box" value="95" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp14">6,210</span></td>
+              <td><span id="maxmp14">1,252</span></td>
+              <td><span id="atk14">292</span></td>
+              <td><span id="def14">292</span></td>
+              <td><span id="mat14">292</span></td>
+              <td><span id="mdf14">292</span></td>
+              <td><span id="agi14">292</span></td>
+              <td><span id="luk14">292</span></td>
+              <td><span id="exp14">1,242</span></td>
+              <td><span id="gold14">1,695</span></td>
+            </tr>
+            <tr>
+              <td><input id="level15" class="box" value="99" min="1" onclick="update()" type="number"></td>
+              <td><span id="maxhp15">6,470</span></td>
+              <td><span id="maxmp15">1,304</span></td>
+              <td><span id="atk15">304</span></td>
+              <td><span id="def15">304</span></td>
+              <td><span id="mat15">304</span></td>
+              <td><span id="mdf15">304</span></td>
+              <td><span id="agi15">304</span></td>
+              <td><span id="luk15">304</span></td>
+              <td><span id="exp15">1,294</span></td>
+              <td><span id="gold15">1,765</span></td>
+            </tr>
+         </tbody>
+       </table>
+      </td>
+    </tr>
+  </tbody></table>
+<script type="text/javascript" src="FlyingDream%27s%20Enemy%20Level%20Calculator_files/jquery-1.js"></script>
+<script type="text/javascript" src="FlyingDream%27s%20Enemy%20Level%20Calculator_files/jquery.js"></script>
+<script type="text/javascript" src="FlyingDream%27s%20Enemy%20Level%20Calculator_files/enemylevelcalculator.js"></script>
+
+</body></html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Pokédex IA - Pallet Town</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f8ff; margin: 0; padding: 20px; }
+    .pokedex { max-width: 400px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .screen { min-height: 100px; background: #000; color: #00ff00; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-family: monospace; }
+    .map-buttons { display: flex; gap: 10px; margin-bottom: 10px; }
+    button { padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #45a049; }
+    input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    .location-panel { display: none; }
+  </style>
+</head>
+<body>
+  <div class="pokedex">
+    <div class="screen" id="screen">🔎 Bem-vindo a Pallet Town. Clique nos locais para explorar.</div>
+
+    <div class="map-buttons">
+      <button onclick="showMap()">🏘️ Cidade</button>
+      <button onclick="enterLocation('center')">🏥 Centro Pokémon</button>
+      <button onclick="enterLocation('lab')">🧪 Laboratório</button>
+    </div>
+
+    <input id="input" placeholder="Fale com o Pokémon..." />
+    <button onclick="send()">Enviar</button>
+  </div>
+
+  <script>
+    const agent = "reception"; // Agente padrão
+
+    async function send() {
+      const input = document.getElementById('input');
+      const screen = document.getElementById('screen');
+      const msg = input.value.trim();
+      if (!msg) {
+        typeWriter(screen, '✉️ Digite uma mensagem para enviar.');
+        return;
+      }
+
+      try {
+        const res = await fetch('https://mating-avalanche-canyon.ngrok-free.dev/chat/' + agent, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg })
+        });
+
+        const data = await res.json();
+        typeWriter(screen, data.reply);
+        input.value = '';
+      } catch (error) {
+        typeWriter(screen, '❌ Erro ao conectar com o agente.');
+      }
+    }
+
+    function showMap() {
+      document.getElementById('screen').innerHTML = '🔎 Você está de volta à cidade de Pallet Town.';
+    }
+
+    function enterLocation(id) {
+      const locations = {
+        center: '🏥 Centro Pokémon - Bem-vindo! Aqui você pode curar seus Pokémon.',
+        lab: '🧪 Laboratório - Porygon está analisando dados científicos.'
+      };
+      typeWriter(document.getElementById('screen'), `➡️ Entrou em ${locations[id]}`);
+    }
+
+    function typeWriter(el, text) {
+      el.innerHTML = '';
+      let i = 0;
+      function type() {
+        if (i < text.length) {
+          el.innerHTML += text.charAt(i);
+          i++;
+          setTimeout(type, 50);
+        }
+      }
+      type();
+    }
+  </script>
+</body>
+</html>
